@@ -12,16 +12,29 @@ body {
 
 /* Print configuration for 80mm kiosk thermal receipts */
 @media print {
-  body * {
-    visibility: hidden;
-  }
-  #receipt-print-area, #receipt-print-area * {
-    visibility: visible;
-  }
-  #receipt-print-area {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 80mm;
-  }
+    /* លាក់រាល់ Element ទាំងអស់ក្នុង body */
+    body * {
+        visibility: hidden !important;
+    }
+    
+    /* បង្ហាញតែ Element ដែលមាន ID នេះ */
+    #thermal-ticket-print, #thermal-ticket-print * {
+        visibility: visible !important;
+    }
+    
+    /* កំណត់ទំហំ និងទីតាំងសំបុត្រ */
+    #thermal-ticket-print {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 76mm !important; /* ទំហំស្តង់ដារម៉ាស៊ីនព្រីនកម្ដៅ */
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    /* លាក់ Header/Footer របស់ Browser */
+    @page {
+        size: auto;
+        margin: 0mm !important;
+    }
 }

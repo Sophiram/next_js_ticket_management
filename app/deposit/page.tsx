@@ -1,4 +1,3 @@
-// app/deposit/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -7,8 +6,6 @@ import { useRouter } from "next/navigation";
 export default function DepositPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
-
-    // State សម្រាប់គ្រប់គ្រងការបង្ហាញផ្ទាំងសំបុត្រជោគជ័យ
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [printedTicket, setPrintedTicket] = useState<any>(null);
 
@@ -24,13 +21,18 @@ export default function DepositPage() {
 
             if (result.success) {
                 setPrintedTicket(result.data);
-                setShowSuccessModal(true); // បើកផ្ទាំង Alert/Modal ជោគជ័យ
+                setShowSuccessModal(true);
 
-                // ទុកពេល 4 វិនាទីឱ្យភ្ញៀវមើលសំបុត្រ រួចទើបបង្វែរទៅកាន់ទំព័រ Kiosk វិញ
+                // បញ្ជាទៅម៉ាស៊ីនព្រីនរបស់ Browser ដោយស្វ័យប្រវត្ត (Thermal Printer Support)
+                setTimeout(() => {
+                    window.print();
+                }, 500);
+
+                // ទុកពេល 6 វិនាទីដើម្បីឱ្យដំណើរការព្រីនចប់ និងឱ្យភ្ញៀវមើលសំបុត្រ រួចទើបបង្វែរទៅកាន់ទំព័រ Kiosk វិញ
                 setTimeout(() => {
                     setShowSuccessModal(false);
                     router.push("/kiosk");
-                }, 4000);
+                }, 6000);
             }
         } catch (err) {
             console.error(err);
@@ -40,66 +42,168 @@ export default function DepositPage() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4 font-khmer relative">
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950 flex flex-col items-center justify-center p-6 font-khmer relative overflow-hidden print:bg-white print:p-0">
 
-            {/* កាតបង្ហាញសេវាកម្មចម្បង */}
-            <div className="bg-white p-8 rounded-2xl shadow-lg text-center max-w-sm w-full space-y-4">
-                <h2 className="text-xl font-bold text-slate-800">សេវាកម្មដាក់ប្រាក់</h2>
-                <p className="text-gray-500 text-sm leading-relaxed">
-                    ដាក់ប្រាក់ចូលគណនី ឬវេរប្រាក់តាមសេវាបញ្ជរ
-                </p>
-                <button
-                    onClick={handlePrint}
-                    disabled={loading}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold shadow-md transition disabled:bg-blue-400"
-                >
-                    {loading ? "កំពុងព្រីន..." : "ចុចទីនេះដើម្បីព្រីនសំបុត្រ"}
-                </button>
-                <button
-                    onClick={() => router.push("/kiosk")}
-                    disabled={loading}
-                    className="w-full bg-gray-100 hover:bg-gray-200 py-2 rounded-xl text-sm font-bold text-gray-500 transition"
-                >
-                    ត្រឡប់ក្រោយ
-                </button>
+            {/* តុបតែងផ្ទៃខាងក្រោយបែបធនាគារទំនើប (Background Decorative Blobs) - លាក់ពេលព្រីន */}
+            <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-3xl pointer-events-none print:hidden" />
+            <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-sky-500/10 rounded-full blur-3xl pointer-events-none print:hidden" />
+
+            {/* កាតបង្ហាញសេវាកម្មចម្បង - លាក់ពេលព្រីន */}
+            <div className="bg-white/95 backdrop-blur-md p-10 rounded-3xl shadow-2xl border border-slate-200 text-center max-w-lg w-full space-y-8 transform transition duration-300 hover:scale-[1.01] print:hidden">
+
+                {/* Brand Header Inside Card */}
+                <div className="space-y-2">
+                    <p className="text-xs font-black tracking-widest text-blue-600 uppercase font-mono">RAMMIEZ BANKING</p>
+                    <div className="h-0.5 w-12 bg-blue-600 mx-auto rounded-full" />
+                </div>
+
+                {/* សញ្ញា Icon តំណាងឱ្យសេវាកម្មដាក់ប្រាក់ (Bank / Vault / Inward Cash Icon) */}
+                <div className="w-20 h-20 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto shadow-inner">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-10 h-10">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v18m0-18 4 4m-4-4L8 7m11 6v6a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-6m14 0H5" />
+                    </svg>
+                </div>
+
+                {/* ឈ្មោះសេវាកម្ម និងការពន្យល់ */}
+                <div className="space-y-3">
+                    <h2 className="text-2xl font-black text-slate-800 tracking-wide">សេវាកម្មដាក់ប្រាក់</h2>
+                    <p className="text-slate-500 text-sm leading-relaxed max-w-sm mx-auto">
+                        សូមចុចប៊ូតុងខាងក្រោមដើម្បីព្រីនសំបុត្ររង់ចាំ សម្រាប់សេវាកម្មដាក់សាច់ប្រាក់ចូលគណនី ឬសេវាផ្ទេរប្រាក់ឆ្លងធនាគារតាមបញ្ជរ។
+                    </p>
+                </div>
+
+                {/* ផ្នែកប៊ូតុងបញ្ជា */}
+                <div className="space-y-3 pt-2">
+                    <button
+                        onClick={handlePrint}
+                        disabled={loading}
+                        className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-4 px-6 rounded-2xl font-bold shadow-lg shadow-blue-600/20 transition-all duration-200 active:scale-[0.99] disabled:from-slate-400 disabled:to-slate-400 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-base"
+                    >
+                        {loading ? (
+                            <>
+                                <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                </svg>
+                                <span>កំពុងព្រីនសំបុត្រ...</span>
+                            </>
+                        ) : (
+                            <>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.617 0-1.11-.51-1.07-1.122L6.34 18m11.32 0h-11.32M9 10.5h.008v.008H9V10.5Zm2.25 0h.008v.008h-.008V10.5Zm2.25 0h.008v.008H13.5V10.5Zm-10.5-6A1.5 1.5 0 0 1 4.5 3h15a1.5 1.5 0 0 1 1.5 1.5v3A1.5 1.5 0 0 1 19.5 9h-15A1.5 1.5 0 0 1 3 7.5v-3Z" />
+                                </svg>
+                                <span>ចុចទីនេះដើម្បីព្រីនសំបុត្រ</span>
+                            </>
+                        )}
+                    </button>
+
+                    <button
+                        onClick={() => router.push("/kiosk")}
+                        disabled={loading}
+                        className="w-full bg-slate-50 hover:bg-slate-100 text-slate-500 py-3 rounded-2xl text-sm font-bold border border-slate-200 transition duration-150 active:bg-slate-200"
+                    >
+                        ត្រឡប់ក្រោយ
+                    </button>
+                </div>
             </div>
 
-            {/* 💡 ផ្ទាំងបង្ហាញសំបុត្រជោគជ័យ (Custom Alert Modal) */}
+            {/* 💡 ផ្ទាំងបង្ហាញសំបុត្រជោគជ័យ (Professional Modal & Thermal Layout) */}
             {showSuccessModal && printedTicket && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
-                    <div className="bg-white text-slate-800 p-8 rounded-2xl shadow-2xl border border-gray-100 max-w-xs w-full text-center space-y-4 transform scale-100 transition-transform">
+                <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 print:relative print:inset-auto print:bg-white print:p-0 print:backdrop-blur-none">
 
-                        {/* រង្វង់សញ្ញាគ្រីសជោគជ័យ */}
-                        <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto text-xl font-bold">
+                    {/* ឃ្លាំងសំបុត្រកម្ដៅ (Thermal Ticket Concept Box) */}
+                    <div className="bg-white text-slate-900 p-8 rounded-3xl shadow-2xl max-w-sm w-full text-center space-y-6 border border-slate-100 relative print:shadow-none print:border-none print:p-0 print:w-[76mm] print:max-w-none">
+
+                        {/* ផ្ទាំងរង្វង់ជោគជ័យ - លាក់ពេលព្រីន */}
+                        <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold shadow-sm print:hidden">
                             ✓
                         </div>
 
-                        <p className="text-xs text-gray-400 font-bold tracking-widest">NAVASAL TICKET</p>
-
-                        {/* បង្ហាញលេខកូដសំបុត្រធំៗច្បាស់ */}
-                        <h3 className="text-5xl font-black text-blue-600 font-mono">
-                            {printedTicket.id.replace("TICKET-", "")}
-                        </h3>
-
-                        <p className="font-bold text-sm bg-slate-50 py-2 rounded-xl text-slate-700 px-3">
-                            {printedTicket.category}
-                        </p>
-
-                        {/* ព័ត៌មានកាលបរិច្ឆេទ */}
-                        <div className="border-t border-dashed border-gray-200 pt-3 text-xs text-gray-400 space-y-1 text-left px-2 font-mono">
-                            <p>📅 កាលបរិច្ឆេទ: {printedTicket.date}</p>
-                            <p>⏰ ម៉ោង: {printedTicket.time}</p>
+                        {/* ក្បាលសំបុត្រ (Ticket Header) */}
+                        <div className="space-y-1">
+                            <h3 className="text-xl font-black tracking-wider text-slate-800">RAMMIEZ BANK</h3>
+                            <p className="text-[10px] text-slate-400 font-mono tracking-widest uppercase">Queue Management System</p>
                         </div>
 
-                        <div className="pt-2">
-                            <p className="text-[11px] text-green-600 font-medium bg-green-50 py-1.5 rounded-lg animate-pulse">
-                                បង្កើតបានជោគជ័យ! សូមរង់ចាំការហៅលេខ...
+                        <div className="border-b border-dashed border-slate-300 my-2" />
+
+                        {/* បង្ហាញលេខកូដសំបុត្រធំៗច្បាស់ (Queue Number) */}
+                        <div className="space-y-1 py-2">
+                            <p className="text-xs text-slate-400 font-bold tracking-wide">លេខសំបុត្ររបស់អ្នក / YOUR NUMBER</p>
+                            <h1 className="text-6xl font-black text-blue-600 font-mono tracking-tight print:text-black">
+                                {printedTicket.id.replace("TICKET-", "")}
+                            </h1>
+                        </div>
+
+                        {/* ប្រភេទសេវាកម្ម (Category Box) */}
+                        <div className="bg-slate-50 border border-slate-100 py-3 px-4 rounded-2xl print:bg-transparent print:border-none print:p-0">
+                            <p className="font-black text-base text-slate-800">
+                                សេវាកម្ម៖ {printedTicket.category}
                             </p>
                         </div>
+
+                        <div className="border-b border-dashed border-slate-300 my-2" />
+
+                        {/* ព័ត៌មានកាលបរិច្ឆេទ និងម៉ោង (Metadata) */}
+                        <div className="text-xs text-slate-600 space-y-1.5 text-left px-4 font-mono">
+                            <div className="flex justify-between">
+                                <span>📅 កាលបរិច្ឆេទ (Date):</span>
+                                <span className="font-bold text-slate-800">{printedTicket.date}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span>⏰ ម៉ោង (Time):</span>
+                                <span className="font-bold text-slate-800">{printedTicket.time}</span>
+                            </div>
+                        </div>
+
+                        <div className="border-b border-dashed border-slate-300 my-2" />
+
+                        {/* ជើងសំបុត្រ (Footer Message) */}
+                        <div className="space-y-1">
+                            <p className="text-[11px] text-slate-500 font-medium">សូមអរគុណ! សូមរង់ចាំការបន្លឺសំឡេងហៅលេខសំបុត្រ</p>
+                            <p className="text-[9px] text-slate-400 font-mono">Please wait for your number to be called.</p>
+                        </div>
+
+                        {/* របារបង្ហាញព័ត៌មានបន្ថែមក្នុង UI - លាក់ពេលព្រីន */}
+                        <div className="pt-4 print:hidden">
+                            <div className="text-xs text-emerald-600 font-bold bg-emerald-50/80 border border-emerald-100 py-2.5 rounded-xl animate-pulse flex items-center justify-center gap-1.5">
+                                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
+                                កំពុងព្រីនសំបុត្រ... ទំព័រនឹងត្រឡប់ក្រោយក្នុងពេលបន្តិចទៀត
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             )}
 
+            {/* បង្កើត Global Tailwind CSS Style សម្រាប់ Print Media Query */}
+            <style jsx global>{`
+    @media print {
+        /* ១. លាករាល់ធាតុទាំងអស់នៅលើទំព័រ */
+        body * {
+            visibility: hidden !important;
+        }
+
+        /* ២. បង្ហាញតែធាតុដែលយើងចង់ព្រីន (ដោយប្រើ ID) */
+        #printable-ticket, #printable-ticket * {
+            visibility: visible !important;
+        }
+
+        /* ៣. កំណត់ទីតាំងសំបុត្រឱ្យនៅខាងឆ្វេងខាងលើនៃក្រដាស */
+        #printable-ticket {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 76mm !important; /* កែតម្រូវតាមទំហំក្រដាស Thermal របស់អ្នក */
+        }
+
+        /* ៤. កម្ចាត់ Margin ស្ដង់ដាររបស់ Browser ដើម្បីកុំឱ្យមានទំព័រទទេ */
+        @page {
+            size: auto;
+            margin: 0mm !important;
+        }
+    }
+`}</style>
         </div>
     );
 }

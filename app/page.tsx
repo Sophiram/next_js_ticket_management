@@ -23,7 +23,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-slate-100 flex flex-col items-center justify-center p-4">
       <div className="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md border border-slate-100">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-black text-[#0a409c] tracking-wider">NAVASEAL TICKET</h1>
+          <h1 className="text-3xl font-black text-[#0a409c] tracking-wider">RAMMIEZ TICKET</h1>
           <p className="text-sm text-gray-400 mt-2 font-medium">សូមបញ្ចូលគណនីដើម្បីគ្រប់គ្រងប្រព័ន្ធ</p>
         </div>
 

@@ -7,8 +7,10 @@ export default function TicketDisplay() {
     const [tickets, setTickets] = useState<Ticket[]>([]);
     const [time, setTime] = useState("");
 
-    // បង្កើត Ref មួយសម្រាប់ចំណាំលេខសំបុត្រដែលបានហៅចុងក្រោយ កុំឱ្យវាហៅដដែលៗពេល Polling លោត
+    // រក្សាទុក ID សំបុត្រចុងក្រោយដើម្បីកុំឱ្យហៅដដែលៗពេល Polling លោត
     const lastCalledIdRef = useRef<string | null>(null);
+    // បង្កើត Ref មួយសម្រាប់រក្សាទុក Utterance ការពារ Browser Garbage Collection លុបវាចោលកណ្ដាលទី
+    const currentUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
     const fetchState = async () => {
         try {
@@ -33,31 +35,27 @@ export default function TicketDisplay() {
         return () => clearInterval(timer);
     }, []);
 
-    // ចម្រាញ់យកសំបុត្រដែលកំពុងហៅ (Approved) ចុងក្រោយគេបំផុត
     const approvedTickets = tickets.filter(t => t.status === "Approved");
     const nowCalling = approvedTickets[0] || null;
     const recentTickets = approvedTickets.slice(1, 6);
     const pendingCount = tickets.filter(t => t.status === "Pending").length;
 
-    // --- តក្កវិជ្ជាសម្រាប់បន្លឺសំឡេង (Voice Text-to-Speech) ---
     // --- តក្កវិជ្ជាសម្រាប់បន្លឺសំឡេង (Voice Text-to-Speech) និយាយ ៥ ដង ---
     useEffect(() => {
         if (nowCalling && nowCalling.id !== lastCalledIdRef.current) {
-            // កំណត់សម្គាល់ ID ថ្មីដើម្បីកុំឱ្យហៅដដែលៗពេល Polling លោត
             lastCalledIdRef.current = nowCalling.id;
 
             const ticketNumber = nowCalling.id.replace("TICKET-", "");
             const speechText = `សូមអញ្ជើញ លេខ ${ticketNumber.split("").join(" ")}`;
 
-            let loopCount = 0; // បង្កើត Variable សម្រាប់រាប់ជុំ
-
-            // បង្កើត Function សម្រាប់និយាយ
-            const speak = () => {
-                if (loopCount >= 5) return; // បើនិយាយគ្រប់ ៥ ដងហើយ ត្រូវបញ្ឈប់
+            // បង្កើត អនុគមន៍ហៅសំឡេងដោយបញ្ជូនចំនួនជុំ (Loop Counter)
+            const speak = (currentLoop: number) => {
+                if (currentLoop >= 5) return; // បញ្ឈប់នៅពេលហៅគ្រប់ ៥ ដង
 
                 const utterance = new SpeechSynthesisUtterance(speechText);
+                currentUtteranceRef.current = utterance; // រក្សាទុកក្នុង Ref
 
-                // កំណត់ភាសាខ្មែរ
+                // កំណត់សំឡេងភាសាខ្មែរ
                 const voices = window.speechSynthesis.getVoices();
                 const khmerVoice = voices.find(voice => voice.lang.startsWith("km") || voice.lang.startsWith("kh"));
 
@@ -65,29 +63,38 @@ export default function TicketDisplay() {
                     utterance.voice = khmerVoice;
                 } else {
                     utterance.lang = "km-KH";
-                    utterance.rate = 0.85; // បន្ថយល្បឿនបន្តិចឱ្យស្តាប់ស្រួល
+                    utterance.rate = 0.85;
                 }
 
-                // នៅពេលដែលនិយាយចប់ ១ ជុំ ឱ្យវាហៅខ្លួនឯង (Speak) ម្តងទៀត
+                // នៅពេលនិយាយចប់ ១ ជុំ ហៅទៅជុំបន្ទាប់
                 utterance.onend = () => {
-                    loopCount++;
-                    speak();
+                    speak(currentLoop + 1);
+                };
+
+                // ករណីមាន Error ផ្សេងៗ ក៏ត្រូវហៅទៅជុំបន្ទាប់ដែរ ដើម្បីកុំឱ្យគាំងដំណើរការ
+                utterance.onerror = () => {
+                    speak(currentLoop + 1);
                 };
 
                 window.speechSynthesis.speak(utterance);
             };
 
-            // បិទសំឡេងចាស់ដែលកំពុងនិយាយ (បើមាន) រួចចាប់ផ្តើមហៅ
+            // បិទសំឡេងចាស់ដែលកំពុងនិយាយទាំងអស់ រួចចាប់ផ្តើមហៅពីជុំទី ០ ទៅ
             window.speechSynthesis.cancel();
-            speak();
+            speak(0);
         }
+
+        // Cleanup function: នៅពេល Component ត្រូវ unmount ឬមានលេខថ្មីមកកាត់ ត្រូវបិទសំឡេងភ្លាម
+        return () => {
+            window.speechSynthesis.cancel();
+        };
     }, [nowCalling]);
 
     return (
         <div className="min-h-screen bg-slate-100 font-khmer p-6 flex flex-col gap-6">
             {/* Top Header Bar */}
             <header className="bg-white rounded-2xl p-4 flex justify-between items-center shadow-sm">
-                <h1 className="text-xl font-black text-[#0a409c]">NAVASEAL TICKET</h1>
+                <h1 className="text-xl font-black text-[#0a409c]">RAMMIEZ TICKET</h1>
                 <div className="text-right">
                     <p className="text-xs text-gray-400">04-06-2026</p>
                     <p className="text-xl font-mono font-black text-blue-600">{time}</p>
@@ -145,6 +152,6 @@ export default function TicketDisplay() {
                 </div>
 
             </div>
-        </div>
+        </div >
     );
 }

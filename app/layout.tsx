@@ -9,7 +9,7 @@ const khmerFont = Noto_Sans_Khmer({
 });
 
 export const metadata: Metadata = {
-  title: "Khmer Ticket System",
+  title: "Rammiez Ticket System",
   description: "Queue Management System Built with Next.js",
 };
 
