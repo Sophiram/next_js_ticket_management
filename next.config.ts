@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // output: 'export', // 👈 បន្ថែមបន្ទាត់នេះ
 };
 
 export default nextConfig;
