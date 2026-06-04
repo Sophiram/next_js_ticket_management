@@ -4,8 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("admin");
+  const [password, setPassword] = useState("admin123");
   const [error, setError] = useState("");
   const router = useRouter();
 
@@ -33,7 +33,7 @@ export default function LoginPage() {
             <input
               type="text"
               required
-              value={"admin"}
+              value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 font-medium transition text-sm"
               placeholder="បញ្ចូលឈ្មោះអ្នកប្រើប្រាស់"
@@ -45,7 +45,7 @@ export default function LoginPage() {
             <input
               type="password"
               required
-              value={"admin123"}
+              value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 font-medium transition text-sm"
               placeholder="បញ្ចូលលេខសម្ងាត់"
